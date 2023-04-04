@@ -4,7 +4,7 @@ SRCS=main.cpp SurveillanceCamera.cpp
 OBJS=$(SRCS:.cpp=.o)
 
 CC=g++
-CFLAGS=-O2 -g -std=c++14
+CFLAGS=-O3 -std=c++14
 INCDIR=-I/usr/include/opencv4
 LIBDIR=
 LIBS=-lopencv_core -lopencv_dnn -lopencv_imgcodecs -lopencv_imgproc -lopencv_objdetect -lopencv_videoio -lopencv_video -lpthread
