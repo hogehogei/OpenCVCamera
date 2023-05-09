@@ -251,10 +251,13 @@ bool ImageWriter::Enqueue( cv::Mat image )
     }
 
     std::lock_guard<std::mutex> guard( m_QueueLock );
-    if( m_WriteQueue.size() < sk_QueueMaxSize ){
-        std::cerr << "Queued image file to ImageWriter" << std::endl;
-        m_WriteQueue.push( image );
+    if( m_WriteQueue.size() >= sk_QueueMaxSize ){
+        std::cerr << "Can't enqueue because queue full." << std::endl;
+        return false;
     }
+
+    std::cerr << "Queued image file to ImageWriter" << std::endl;
+    m_WriteQueue.push( image );
 
     return true;
 }
@@ -560,9 +563,13 @@ void SurveillanceCamera::DoStreamingAndRecordingFaces()
 
     try {
         cv::Mat frame;
+
+        cv::TickMeter meter;
         std::cout << "Capture before" << std::endl;
+        meter.start();
         m_Capture >> frame;
-        std::cout << "Captured" << std::endl;
+        meter.stop();
+        std::cout << "Captured " << meter.getTimeMilli() << "[ms]" << std::endl;
 
         m_WebStreamWriter->Enqueue( frame.clone() );
         m_DetectedFaceRecorder->Enqueue( frame.clone() );
@@ -572,7 +579,7 @@ void SurveillanceCamera::DoStreamingAndRecordingFaces()
     }
     catch( ... ){
         ++m_RecorderConsecutiveErrorCount;
-        // TODO: ログ記録
+        std::cerr << "DoStreamingAndRecordingFaces() error occoured!" << std::endl;
     }
 
     m_PrevDetectState = m_DetectState;
